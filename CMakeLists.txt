@@ -17,6 +17,11 @@ add_executable(board_test
   src/board.cpp
 )
 
+# Отдельная проверка компиляции ИИ.
+add_library(ai_check OBJECT
+  src/ai.cpp
+)
+
 # Игра собирается, когда в проекте появятся ai.cpp и display.cpp
 # (после слияния веток feature/ai и feature/ui).
 if(EXISTS ${CMAKE_SOURCE_DIR}/src/ai.cpp AND

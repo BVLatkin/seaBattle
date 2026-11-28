@@ -1,8 +1,8 @@
+
 // ai.cpp — реализация компьютерного противника.
 
 #include "ai.h"
 
-#include <algorithm>
 #include <stdexcept>
 
 Ai::Ai(unsigned seed) : rng_(seed) {}
@@ -62,13 +62,45 @@ void Ai::ReportResult(Coord shot, ShotResult result) {
   if (result == ShotResult::kHit) {
     hits_.push_back(shot);
 
-    AddTarget({shot.row - 1, shot.col});
-    AddTarget({shot.row + 1, shot.col});
-    AddTarget({shot.row, shot.col - 1});
-    AddTarget({shot.row, shot.col + 1});
+    if (hits_.size() == 1) {
+      AddTarget({shot.row - 1, shot.col});
+      AddTarget({shot.row + 1, shot.col});
+      AddTarget({shot.row, shot.col - 1});
+      AddTarget({shot.row, shot.col + 1});
+    } else {
+      targets_.clear();
+
+      bool horizontal = hits_[0].row == shot.row;
+
+      if (horizontal) {
+        AddTarget({shot.row, shot.col - 1});
+        AddTarget({shot.row, shot.col + 1});
+      } else {
+        AddTarget({shot.row - 1, shot.col});
+        AddTarget({shot.row + 1, shot.col});
+      }
+    }
   }
 
   if (result == ShotResult::kKill) {
+    for (const Coord& hit : hits_) {
+      for (int row = hit.row - 1; row <= hit.row + 1; ++row) {
+        for (int col = hit.col - 1; col <= hit.col + 1; ++col) {
+          if (Board::InBounds(row, col)) {
+            shots_[row][col] = true;
+          }
+        }
+      }
+    }
+
+    for (int row = shot.row - 1; row <= shot.row + 1; ++row) {
+      for (int col = shot.col - 1; col <= shot.col + 1; ++col) {
+        if (Board::InBounds(row, col)) {
+          shots_[row][col] = true;
+        }
+      }
+    }
+
     hits_.clear();
     targets_.clear();
   }
